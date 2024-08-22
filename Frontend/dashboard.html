@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Dashboard</h2>
+    <div class="row" id="tiles-container-admin">
+        <!-- Le tiles per gli utenti registrati saranno aggiunte qui -->
+    </div>
+    <button id="logout" class="btn btn-danger mt-3">Logout</button>
+    <button id="lista" class="btn btn-danger mt-3" onclick="vedilista()">vedi autisti</button>
+</div>
+
+<script>
+    function vedilista(){
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        console.log('Autisti: ');
+        users.forEach(function(users,index) {
+            console.log(index + ' '+ users.nome);
+        });
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

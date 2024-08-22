@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo Utente</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="#" id="logoutButton" class="btn">Logout</a>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <h2 id="welcomeMessage">Benvenuto!</h2>
+        </div>
+        <div class="profile-details">
+            <p><strong>Data di nascita:</strong> <span id="dob">Nome Utente</span></p>
+            <p><strong>Email:</strong> <span id="profileEmail">email@esempio.com</span></p>
+            <p><strong>Viaggi effettuati:</strong> <span id="viaggi">Viaggi</span></p>
+            <p><strong>Disponibilità:</strong> <span id="disponibilita">Disponibilità</span></p>
+        </div>
+        <div class="action-buttons">
+            <button id="btnCandidati" class="btn btn-candidati">Candidati</a>
+            <button id="btnRimuovi" class="btn btn-rimuovi">Rimuovi Disponibilità</a>
+        </div>
+    </div>
+
+    <script>
+        // Simula il recupero dell'utente dal localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedUser'));
+
+            if (loggedInUser) {
+                // Mostra i dati dell'utente nella pagina del profilo
+                document.getElementById('welcomeMessage').textContent = 'Benvenuto, ' + loggedInUser.nome + ' ' + loggedInUser.cognome;
+                document.getElementById('dob').textContent = loggedInUser.dataDiNascita;
+                document.getElementById('profileEmail').textContent = loggedInUser.email;
+                document.getElementById('viaggi').textContent = loggedInUser.viaggi;
+                if(loggedInUser.disponibilita == '1'){
+                    document.getElementById('disponibilita').textContent = 'Si';
+                }else{
+                    document.getElementById('disponibilita').textContent = 'No';
+                }
+            } else {
+                // Se non c'è nessun utente loggato, reindirizza alla pagina di login
+                window.location.href = 'login.html';
+            }
+
+            // Gestione del logout
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                localStorage.removeItem('loggedUser');
+                window.location.href = 'login.html'; // Reindirizza alla pagina di login
+            });
+        });
+    </script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

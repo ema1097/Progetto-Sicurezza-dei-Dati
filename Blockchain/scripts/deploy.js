@@ -8,11 +8,13 @@ const hre = require("hardhat");
 
 
 async function main() {
-  const Lock = await hre.ethers.deployContract("Lock");
+  const ViaggiAutisti = await hre.ethers.deployContract("ViaggiAutisti");
 
-  await Lock.waitForDeployment();
+  const [deployer] = await hre.ethers.getSigners();
 
-  console.log("deployed to ", await Lock.getAddress());
+  await ViaggiAutisti.waitForDeployment();
+  console.log("The admin autism is ", deployer.address);
+  console.log("The contract address is ", await ViaggiAutisti.getAddress());
 }
 
 // We recommend this pattern to be able to use async/await everywhere
