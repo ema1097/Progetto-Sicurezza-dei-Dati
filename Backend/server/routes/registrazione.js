@@ -1,47 +1,54 @@
 import express from "express";
 const router = express.Router();
 
-import { salvaStringaSuIPFS } from './../scripts/ipfs_function.js'
-import { registraDispositivo } from './../scripts/interazione_contratto.js'
-
-import {executeCProgram} from './../scripts/c_adapter.js';
-import { chiave_cifratura, cifra } from './../scripts/diffieHelman.js'
-import { generateDeviceID } from './../scripts/utils.js'
-import { idMap } from './../scripts/myMapp.js'
+import { registraAutista, aggiungiNuovaTratta, creaViaggio } from './../scripts/interazione_contratto.js'
 
 
-// Endpoint per l'avvio del contratto e registrazione del dispositivo IoT
-router.post('/registraDispositivoIoT', async (req, res) => {
+// Endpoint per registrare un autista
+router.post('/registraAutista', async (req, res) => {
 
-  const { address_dispositivo, dump} = req.body;
+  const { autistaAddress, email, nome, cognome, admin} = req.body;
 
-  const {stdout} = await executeCProgram("cd server/c_code/ && ./genera_helper_data",`${dump}`);
-  
-  let responseData = JSON.parse(stdout);
-
-  let helper_data = responseData.Helper_Data;
-
-
-  let id = generateDeviceID(idMap);
-  
-  // Cifro il dump
-  const encryptedData  = cifra(chiave_cifratura, dump);
-  
-  // Salvo il il dump cifrato su IPFS e ottengo il suo CID
-  const CID = await salvaStringaSuIPFS(encryptedData);
-
-  if (CID !== false){
-    
-    // Salvo il dispositivo sulla blockchain in caso di successo ottengo un suo riferimento
-    const { success, message} = await registraDispositivo(address_dispositivo, id, CID, helper_data);
+  // Salvo l'autista sulla blockchain
+  const { success, message} = await registraAutista(autistaAddress, email, nome, cognome, admin);
     
     if(success === true)
-      res.json({ success: success, riferimento: message, id: id, helper_data: helper_data  });
+      res.json({ success: success });
     else 
       res.json({ success: success, message: message  });
-  } else {
-    res.json({ success: false, message: "Errore nella connessione al server IPFS" });
-  }
+ 
+
+});
+
+// Endpoint per salvare una tratta
+router.post('/registraTratta', async (req, res) => {
+
+  const { partenza, arrivo, data, pagamento, admin} = req.body;
+
+  // Salvo l'autista sulla blockchain
+  const { success, message} = await aggiungiNuovaTratta(partenza, arrivo, data, pagamento, admin);
+    
+    if(success === true)
+      res.json({ success: success });
+    else 
+      res.json({ success: success, message: message  });
+ 
+
+});
+
+// Endpoint per salvare un viaggio
+router.post('/registraViaggio', async (req, res) => {
+
+  const { autistaAddress, trattaId, admin} = req.body;
+
+  // Salvo l'autista sulla blockchain
+  const { success, message} = await creaViaggio(autistaAddress, trattaId, admin);
+    
+    if(success === true)
+      res.json({ success: success });
+    else 
+      res.json({ success: success, message: message  });
+ 
 
 });
 

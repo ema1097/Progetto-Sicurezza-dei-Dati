@@ -46,6 +46,8 @@ describe("ViaggiAutisti", function () {
 
         // Controlla che l'autista sia stato registrato correttamente
         const autista = await VIA.autisti(indirizzoAutista1);
+        
+        expect(autista.id).to.equal(indirizzoAutista1);
         expect(autista.email).to.equal("test@example.com");
         expect(autista.nome).to.equal("Mario");
         expect(autista.cognome).to.equal("Rossi");
@@ -66,6 +68,60 @@ describe("ViaggiAutisti", function () {
         // Controlla che la disponibilità sia stata aggiornata
         const autista = await VIA.autisti(indirizzoAutista1);
         expect(autista.disponibile).to.be.true;
+    });
+
+    it("Ottieni tutti gli autisti", async function () {
+      const { VIA, owner } = await loadFixture(deployContract);
+  
+      // Registra due autisti
+      await VIA.registraNuovoAutista(indirizzoAutista1, "test@example.com", "Mario", "Rossi");
+      await VIA.registraNuovoAutista(indirizzoAutista2, "peppino@example.com", "Luigi", "Verdi");
+  
+      // Recupera tutti gli autisti disponibili
+      const autistiDisponibili = await VIA.getAllAutisti();
+  
+
+      // Array con i dati attesi
+      const autistiAttesi = [
+          { id: indirizzoAutista1, email: "test@example.com", nome: "Mario", cognome: "Rossi", disponibile: false },
+          { id: indirizzoAutista2, email: "peppino@example.com", nome: "Luigi", cognome: "Verdi", disponibile: false },
+      ];
+
+      // Verifica che il numero di autisti sia corretto
+      expect(autistiDisponibili.length).to.equal(autistiAttesi.length);
+
+      // Verifica che ciascun autista registrato corrisponda a quelli attesi
+      for (let i = 0; i < autistiAttesi.length; i++) {
+          const registrato = autistiDisponibili[i];
+          const atteso = autistiAttesi[i];
+
+          expect(registrato.id).to.equal(atteso.id);
+          expect(registrato.email).to.equal(atteso.email);
+          expect(registrato.nome).to.equal(atteso.nome);
+          expect(registrato.cognome).to.equal(atteso.cognome);
+          expect(registrato.disponibile).to.equal(atteso.disponibile);
+      }
+    });
+
+    it("Ottieni tutti gli autisti disponibili", async function () {
+      const { VIA, owner } = await loadFixture(deployContract);
+  
+      // Registra due autisti
+      await VIA.registraNuovoAutista(indirizzoAutista1, "test@example.com", "Mario", "Rossi");
+      await VIA.registraNuovoAutista(indirizzoAutista2, "peppino@example.com", "Luigi", "Verdi");
+  
+      // Aggiorna la disponibilità di uno degli autisti
+      await VIA.aggiornaDisponibilitaAutista(indirizzoAutista1, true);
+  
+      // Recupera tutti gli autisti disponibili
+      const autistiDisponibili = await VIA.getAutistaDisponibile();
+  
+      // Verifica che ci sia solo un autista disponibile e che sia quello giusto
+      expect(autistiDisponibili.length).to.equal(1);
+      expect(autistiDisponibili[0].email).to.equal("test@example.com");
+      expect(autistiDisponibili[0].nome).to.equal("Mario");
+      expect(autistiDisponibili[0].cognome).to.equal("Rossi");
+      expect(autistiDisponibili[0].disponibile).to.be.true;
     });
 
   });
@@ -94,6 +150,38 @@ describe("ViaggiAutisti", function () {
         await expect(
           VIA.connect(otherAccount).aggiungiNuovaTratta("Milano", "Roma", "2024-09-01", "1000 euro")
         ).to.be.revertedWith("Solo l'admin puo aggiungere una nuova tratta");
+    });
+
+    it("Ottieni tutti le tratte", async function () {
+      const { VIA, owner } = await loadFixture(deployContract);
+
+      // Aggiungi una nuova tratta
+      await VIA.aggiungiNuovaTratta("Milano", "Roma", "2024-09-01", "1000 euro");
+      await VIA.aggiungiNuovaTratta("Roma", "Milano", "2024-09-01", "10000000000 euro");
+  
+      // Recupera tutte le tratte disponibili
+      const tratteDisponibili = await VIA.getAllTratte();
+
+      // Array con i dati attesi
+      const tratteAttese = [
+          { partenza: "Milano", arrivo: "Roma", data: "2024-09-01", pagamento: "1000 euro", assegnata: false },
+          { partenza: "Roma", arrivo: "Milano", data: "2024-09-01", pagamento: "10000000000 euro", assegnata: false },
+      ];
+
+      // Verifica che il numero di tratte sia corretto
+      expect(tratteDisponibili.length).to.equal(tratteAttese.length);
+
+      // Verifica che ciascuna tratta registrata corrisponda a quelle attese
+      for (let i = 0; i < tratteAttese.length; i++) {
+          const registrata = tratteDisponibili[i];
+          const attesa = tratteAttese[i];
+
+          expect(registrata.partenza).to.equal(attesa.partenza);
+          expect(registrata.arrivo).to.equal(attesa.arrivo);
+          expect(registrata.data).to.equal(attesa.data);
+          expect(registrata.pagamento).to.equal(attesa.pagamento);
+          expect(registrata.assegnata).to.equal(attesa.assegnata);
+      }
     });
 
     it("Creazione di un viaggio con autista disponibile", async function () {

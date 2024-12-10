@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autisti Registrati</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .tile {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .tile h5 {
+            margin-bottom: 15px;
+            color: #343a40;
+        }
+        .tile p {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Autisti Registrati</h2>
+    <div class="row" id="autisti-container">
+        <!-- Le informazioni degli autisti saranno inserite dinamicamente qui -->
+    </div>
+    <a href="dashboard.html" class="btn btn-primary mt-3">Torna alla Dashboard</a>
+</div>
+
+<script>
+
+function caricaAutisti() {
+    // Elemento del container
+    let autistiContainer = document.getElementById('autisti-container');
+
+    // Svuota il contenuto prima di popolarlo
+    autistiContainer.innerHTML = '';
+
+    $.ajax({
+        url: "http://127.0.0.1:3007/autisti/getAllAutisti", // Endpoint per recuperare gli autisti
+        type: "GET", // Metodo GET per ottenere i dati
+        success: function(response) {
+            if (response.success && response.autisti.length > 0) {
+                // Itera sugli autisti e crea una tile per ciascuno
+                response.autisti.forEach(function(autista) {
+                    let col = document.createElement('div');
+                    col.classList.add('col-md-4');
+
+                    let tile = document.createElement('div');
+                    tile.classList.add('tile');
+
+                    let autistaNome = document.createElement('h5');
+                    autistaNome.textContent = 'Nome: ' + autista.nome + " " + autista.cognome;
+
+                    let autistaEmail = document.createElement('p');
+                    autistaEmail.textContent = 'Email: ' + autista.email;
+
+                    let autistaViaggi = document.createElement('p');
+                    autistaViaggi.textContent = 'Viaggi: ' + autista.numeroViaggi;
+
+                    let autistaDisponibilita = document.createElement('p');
+                    autistaDisponibilita.textContent = 'Disponibilità: ' + (autista.disponibile ? 'Sì' : 'No');
+
+                    // Aggiunge gli elementi alla tile
+                    tile.appendChild(autistaNome);
+                    tile.appendChild(autistaEmail);
+                    tile.appendChild(autistaViaggi);
+                    tile.appendChild(autistaDisponibilita);
+
+                    // Aggiunge la tile alla colonna
+                    col.appendChild(tile);
+
+                    // Aggiunge la colonna alla riga del container
+                    autistiContainer.appendChild(col);
+                });
+            } else if (response.success && response.autisti.length === 0) {
+                // Se non ci sono autisti
+                autistiContainer.innerHTML = '<p class="text-center">Nessun autista registrato.</p>';
+            } else {
+                console.error("Errore nella risposta:", response.message);
+                autistiContainer.innerHTML = '<p class="text-center text-danger">Errore nel caricamento degli autisti.</p>';
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Errore durante la richiesta:", error);
+            autistiContainer.innerHTML = '<p class="text-center text-danger">Errore nel caricamento degli autisti.</p>';
+        }
+    });
+}
+
+    // Funzione per caricare e visualizzare le informazioni degli autisti dal localStorage
+  /*  function caricaAutisti() {
+        let autisti = JSON.parse(localStorage.getItem('users')) || [];
+        let autistiContainer = document.getElementById('autisti-container');
+        
+        // Svuota il contenuto prima di popolarlo
+        autistiContainer.innerHTML = '';
+
+        if (autisti.length === 0) {
+            // Se non ci sono autisti, mostra un messaggio
+            autistiContainer.innerHTML = '<p class="text-center">Nessun autista registrato.</p>';
+        } else {
+            // Crea una tile per ogni autista
+            autisti.forEach(function(autista, index) {
+                let col = document.createElement('div');
+                col.classList.add('col-md-4');
+
+                console.log(autista);
+                
+                let tile = document.createElement('div');
+                tile.classList.add('tile');
+                
+                let autistaNome = document.createElement('h5');
+                autistaNome.textContent = 'Nome: ' + autista.nome + " " + autista.cognome;
+                
+                let autistaEmail = document.createElement('p');
+                autistaEmail.textContent = 'Email: ' + autista.email;
+
+                let autistaData = document.createElement('p');
+                autistaData.textContent = 'Data di nascita: ' + autista.dataDiNascita;
+
+                let autistaViaggi = document.createElement('p');
+                autistaViaggi.textContent = 'Viaggi: ' + autista.viaggi;
+
+                let autistaDisponibilita = document.createElement('p');
+                autistaDisponibilita.textContent = 'Disponibilità: ' + autista.disponibilita;
+       
+
+                // Aggiunge gli elementi alla tile
+                tile.appendChild(autistaNome);
+                tile.appendChild(autistaEmail);
+                tile.appendChild(autistaData);
+                tile.appendChild(autistaViaggi);
+                tile.appendChild(autistaDisponibilita);
+
+                // Aggiunge la tile alla colonna
+                col.appendChild(tile);
+
+                // Aggiunge la colonna alla riga del container
+                autistiContainer.appendChild(col);
+            });
+        }
+    }*/
+
+    // Carica le informazioni degli autisti al caricamento della pagina
+    window.onload = caricaAutisti;
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</body>
+</html>

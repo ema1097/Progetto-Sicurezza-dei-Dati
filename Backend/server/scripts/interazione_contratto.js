@@ -1,5 +1,5 @@
 // Importa le funzioni necessarie da altri moduli
-import { getWeb3, getContract, logErrori } from './utils.js';
+import { getWeb3, getContract } from './utils.js';
 
 let web3;
 let contract;
@@ -17,208 +17,194 @@ async function InizializzaContratto(){
     return { web3: web3, contract: contract };
 };
 
-// Funzione per registrare un dispositivo sulla blockchain
-export const registraDispositivo = async (address_dispositivo, id_dispositivo, CID, helper_data) => {
+// Funzione per registrare un autista sulla blockchain
+export const registraAutista = async (autistaAddress, email, nome, cognome, admin) => {
 
     const { contract } = await InizializzaContratto();
     
     try {
-        // Esegui la registrazione del dispositivo IoT
-        const output = await contract.methods.registrazioneDispositivoIoT(id_dispositivo, CID, helper_data).send({ from: address_dispositivo });
-        // Log dell'evento restituito dalla transazione
-        const riferimento = output.events.RegistrazioneDispositivoIoTEvent.returnValues.riferimento;
-
-        return { success: true, message: riferimento };
+        // Esegui la registrazione dell'autista
+        const output = await contract.methods.registraNuovoAutista(autistaAddress, email, nome, cognome).send({ from: admin });
+        
+        return { success: true, message: 'Autista aggiunto' };
     } catch (error) {
-        const errore_stringa = JSON.stringify(error);
-
-        logErrori(errore_stringa);
-
-        switch(true) {
-            case errore_stringa.includes("Il campo id non puo' essere vuoto"):
-                return { success: false, message: 'Il campo id non può essere vuoto' };
-            case errore_stringa.includes("Il campo CID non puo' essere vuoto"):
-                return { success: false, message: 'Il campo CID non può essere vuoto' };
-            case errore_stringa.includes("Il campo helperData non puo' essere vuoto"):
-                return { success: false, message: 'Il campo helper data non può essere vuoto' };
-            case errore_stringa.includes("Dispositivo registrato precedentemente."):
-                return { success: false, message: 'Dispositivo gia\' registrato!' };
-            default:
-                return { success: false, message: 'Errore sconosciuto!' };
-        }
+        return { success: false, message: error };
+        
     }
 }
 
-// Funzione per salvare le informazioni per raggiungere il server sulla blockchain
-export const salvaInformazioniAutenticazione = async (address_dispositivo, id_dispositivo, riferimentoAutenticazione, indirizzo_serverB, InitA, NSA, NSB) => {
-
+// Funzione per aggiornare la disponibilità di un autista
+export const aggiornaDisponibilitaAutista = async (autistaAddress, disponibilita) => {
     const { contract } = await InizializzaContratto();
 
     try {
-        // Esegui l'avvio dell'autenticazione
-        const output = await contract.methods.avviaAutenticazione(id_dispositivo, riferimentoAutenticazione, indirizzo_serverB, InitA, NSA, NSB).send({ from: address_dispositivo });
-        
-        // Log dell'evento restituito dalla transazione
-        const riferimento = output.events.avviaAutenticazioneEvent.returnValues.riferimento;
-    
-        return { success: true, message: riferimento};
+        await contract.methods
+            .aggiornaDisponibilitaAutista(autistaAddress, disponibilita)
+            .send({ from: autistaAddress });
 
-      } catch (error) {
-
-        const errore_stringa = JSON.stringify(error);
-
-        logErrori(errore_stringa);
-
-        switch(true) {
-            case errore_stringa.includes("L'indirizzo non puo' essere vuoto"):
-                return { success: false, message: 'L\'indirizzo del server non può essere vuoto!' };
-            case errore_stringa.includes("Il campo NInitA non puo' essere vuoto"):
-                return { success: false, message: 'Il campo NInitA non può essere vuoto!' };
-            case errore_stringa.includes("Il campo NSA non puo' essere vuoto"):
-                return { success: false, message: 'Il campo NSA non può essere vuoto' };
-            case errore_stringa.includes("Il campo NSB non puo' essere vuoto"):
-                return { success: false, message: 'Il campo NSB non può essere vuoto' };
-            case errore_stringa.includes("Dispositivo non registrato precedentemente!"):
-                return { success: false, message: `Dispositivo ${id_dispositivo} non registrato!` };
-            case errore_stringa.includes("Autenticazione gia avviata con questo dispositivo."):
-                return { success: false, message: `Processo di autenticazione già avviato con il dispositivo ${id_dispositivo}!` };
-            default:
-                return { success: false, message: 'Errore sconosciuto!' };
-        }
-    }
-}
-
-// Funzione per registrare il completamento della fase di autenticazione da parte di un dispositivo
-export const completaAutenticazioneServer = async (address_dispositivo, id_dispositivo, riferimentoAutenticazione, server) => {
-
-    const { contract } = await InizializzaContratto();
-
-    try {
-      
-        const output = await contract.methods.completaAutenticazioneServer(id_dispositivo, riferimentoAutenticazione, server).send({ from: address_dispositivo });
-  
-        const messaggio = output.events.confermaAutenticazione.returnValues.str;
-
-        return { success: true, message: messaggio };
-      } catch (error) {
-
-        const errore_stringa = JSON.stringify(error);
-        
-        logErrori(errore_stringa);
-
-        switch(true) {
-            case errore_stringa.includes("Dispositivo non registrato precedentemente."):
-                return { success: false, message: `Dispositivo ${id_dispositivo} non registrato!` };
-            case errore_stringa.includes("Autenticazione non avviata."):
-                return { success: false, message: 'Autenticazione non avviata!' };
-            case errore_stringa.includes("Il dispositivo B ha gia' confermato l'autenticazione!"):
-                return { success: false, message: `Il dispositivo ${id_dispositivo} ha già confermato l\'autenticazione!` };
-            case errore_stringa.includes("Il dispositivo A ha gia' confermato l'autenticazione!"):
-                return { success: false, message: `Il dispositivo ${id_dispositivo} ha già confermato l\'autenticazione!` };
-            default:
-                return { success: false, message: 'Errore sconosciuto!' };
-        }
-    }
-}
-
-//
-export const ottieniDatiAutenticazione = async (address_dispositivo, id, riferimentoAutenticazione) => {
-    const { contract } = await InizializzaContratto();
-
-    try {
-        // Esegui la registrazione del dispositivo IoT
-        const informazioniAutenticazione = await contract.methods.ottieniDatiAutenticazione(id, riferimentoAutenticazione).call({ from: address_dispositivo });
-        return { success: true, message: informazioniAutenticazione };
-
-      } catch (error) {
-
-        const errore_stringa = JSON.stringify(error);
-        
-        logErrori(errore_stringa);
-
-        switch(true) {
-            case errore_stringa.includes("Dispositivo non registrato precedentemente."):
-                return { success: false, message: `Dispositivo ${id} non registrato!` };
-            case errore_stringa.includes("Autenticazione non avviata."):
-                return { success: false, message: 'Autenticazione non avviata!' };
-            default:
-                return { success: false, message: 'Errore sconosciuto!' };
-        }
-    }
-}
-
-//
-export const autenticazioneIsStabilita = async (address_dispositivo, id, riferimentoAutenticazione) => {
-    const { contract } = await InizializzaContratto();
-
-    try {
-        // Esegui la registrazione del dispositivo IoT
-        const isStabilita = await contract.methods.autenticazioneStabilita(id, riferimentoAutenticazione).call({ from: address_dispositivo });
-        
-        return { success: true, message: isStabilita };
-
-      } catch (error) {
-
-        const errore_stringa = JSON.stringify(error);
-        
-        logErrori(errore_stringa);
-
-        switch(true) {
-            case errore_stringa.includes("Dispositivo non registrato precedentemente."):
-                return { success: false, message: `Dispositivo ${id} non registrato!` };
-            case errore_stringa.includes("Autenticazione non avviata."):
-                return { success: false, message: 'Autenticazione non avviata!' };
-            default:
-                return { success: false, message: 'Errore sconosciuto!' };
-        }
-    }
-}
-// Funzione per ottenere le informazioni di un dispositivo dalla blockchain
-export const ottieniInformazioniDispositivo = async (address_dispositivo, id_dispositivo) => {
-
-    const { contract } = await InizializzaContratto();
-
-    try {
-        // Ottengo le informazioni del dispositivo dalla blockchain
-        const infoDispositivo = await contract.methods.getInfoDispositivoIoT(id_dispositivo).call({ from: address_dispositivo });
-
-        return { success: true, message: infoDispositivo };
-
+        return { success: true, message: 'Disponibilità aggiornata con successo' };
     } catch (error) {
-        const errore_stringa = JSON.stringify(error);
-
-        logErrori(errore_stringa);
-
-        switch(true) {
-            case errore_stringa.includes("Dispositivo non registrato!"):
-                return { success: false, message: `Dispositivo con id: ${id_dispositivo} non registrato`};
-            default:
-                return { success: false, message: 'Errore sconosciuto!' };
-        }
+        return { success: false, message: error.message || error };
     }
-}
+};
 
-// Funzione per ottenere i CID di due dispositivi dalla blockchain
-export const ottieniCIDsDispositivi = async (address_dispositivo, id_dispositivo1, id_dispositivo2) => {
 
+export const aggiungiNuovaTratta = async (partenza, arrivo, data, pagamento, admin) => {
     const { contract } = await InizializzaContratto();
 
     try {
-        // Esegui la registrazione del dispositivo IoT
-        const CIDs = await contract.methods.getCIDs(id_dispositivo1, id_dispositivo2).call({ from: address_dispositivo });
-        return { success: true, message: CIDs };
+        await contract.methods
+            .aggiungiNuovaTratta(partenza, arrivo, data, pagamento)
+            .send({ from: admin });
+
+        return { success: true, message: 'Nuova tratta aggiunta con successo' };
     } catch (error) {
-        const errore_stringa = JSON.stringify(error);
+        return { success: false, message: error.message || error };
+    }
+};
 
-        logErrori(errore_stringa);
+// Funzione per creare un viaggio
+export const creaViaggio = async (autistaAddress, trattaId, admin) => {
+    const { contract } = await InizializzaContratto();
 
-        switch(true) {
-            case errore_stringa.includes("Dispositivo A non registrato!"):
-                return { success: false, message: `Dispositivo con id: ${id_dispositivo1} non registrato`};
-            case errore_stringa.includes("Dispositivo B non registrato!"):
-                return { success: false, message: `Dispositivo con id: ${id_dispositivo2} non registrato`};
-            default:
-                return { success: false, message: 'Errore sconosciuto!' };
-        }   
+    try {
+        await contract.methods
+            .creaViaggio(autistaAddress, trattaId)
+            .send({ from: admin });
+
+        return { success: true, message: 'Viaggio creato con successo' };
+    } catch (error) {
+        return { success: false, message: error.message || error };
+    }
+};
+
+// Funzione per mostrare tutti i viaggi
+export const mostraTuttiIViaggi = async () => {
+    const { contract } = await InizializzaContratto();
+
+    try {
+        const allViaggi = await contract.methods.mostraTuttiIViaggi().call();
+
+        // Mappare i dati dei viaggi in un formato leggibile
+        const viaggiFormattati = allViaggi.map(viaggio => ({
+            autista: {
+                id: viaggio.aut.id,
+                email: viaggio.aut.email,
+                nome: viaggio.aut.nome,
+                cognome: viaggio.aut.cognome,
+                numeroViaggi: viaggio.aut.numeroViaggi.toString(),  // Convertire BigInt in stringa
+                disponibile: viaggio.aut.disponibile
+            },
+            tratta: {
+                id: viaggio.t.id.toString(),
+                partenza: viaggio.t.partenza,
+                arrivo: viaggio.t.arrivo,
+                data: viaggio.t.data,
+                pagamento: viaggio.t.pagamento,
+                assegnata: viaggio.t.assegnata
+            }
+        }));
+
+        return { success: true, message: viaggiFormattati };
+    } catch (error) {
+        return { success: false, message: error.message || error };
+    }
+};
+
+// Funzione per mostrare i viaggi di un autista
+export const mostraViaggiAutista = async (autistaAddress) => {
+    const { contract } = await InizializzaContratto();
+
+    try {
+        const allViaggi = await contract.methods.mostraViaggiAutista(autistaAddress).call();
+
+        // Mappare i dati dei viaggi in un formato leggibile
+        const viaggiAutistaFormattati = allViaggi.map(viaggio => ({
+            autista: {
+                id: viaggio.aut.id,
+                email: viaggio.aut.email,
+                nome: viaggio.aut.nome,
+                cognome: viaggio.aut.cognome,
+                numeroViaggi: viaggio.aut.numeroViaggi.toString(),  // Convertire BigInt in stringa
+                disponibile: viaggio.aut.disponibile
+            },
+            tratta: {
+                id: viaggio.t.id.toString(),
+                partenza: viaggio.t.partenza,
+                arrivo: viaggio.t.arrivo,
+                data: viaggio.t.data,
+                pagamento: viaggio.t.pagamento,
+                assegnata: viaggio.t.assegnata
+            }
+        }));
+
+        return { success: true, message: viaggiAutistaFormattati };
+    } catch (error) {
+        return { success: false, message: error.message || error };
+    }
+};
+
+export const getAllAutisti = async () =>{
+    const { contract, admin} = await InizializzaContratto();
+
+    try {
+        const allAutisti = await contract.methods.getAllAutisti().call();
+
+        // Mappare e formattare i dati per avere solo proprietà leggibili
+        const autistiFormattati = allAutisti.map(autista => ({
+            id: autista.id,
+            email: autista.email,
+            nome: autista.nome,
+            cognome: autista.cognome,
+            numeroViaggi: autista.numeroViaggi.toString(), // Convertilo a stringa, in modo che BigInt non crei problemi
+            disponibile: autista.disponibile
+        }));
+        
+        return { success: true, message: autistiFormattati };
+    } catch (error) {
+        return { success: false, message: error.message || error };
+    }
+}
+
+export const getAllTratte = async () =>{
+    const { contract } = await InizializzaContratto();
+
+    try {
+        const allTratte = await contract.methods.getAllTratte().call();
+
+        // Mappare e formattare i dati per avere solo proprietà leggibili
+        const tratteFormattate = allTratte.map(tratta => ({
+            id: tratta.id.toString(),
+            partenza: tratta.partenza,
+            arrivo: tratta.arrivo,
+            data: tratta.data,
+            pagamento: tratta.pagamenti, 
+            assegnata: tratta.assegnata
+        }));
+
+        return { success: true, message: tratteFormattate };
+    } catch (error) {
+        return { success: false, message: error.message || error };
+    }
+}
+
+export const getAutistaDisponibile = async () =>{
+    const { contract } = await InizializzaContratto();
+
+    try {
+        const autistiDiponibili = await contract.methods.getAutistaDisponibile().call();
+
+        // Mappare e formattare i dati per avere solo proprietà leggibili
+        const autistiFormattati = autistiDiponibili.map(autista => ({
+            id: autista.id,
+            email: autista.email,
+            nome: autista.nome,
+            cognome: autista.cognome,
+            numeroViaggi: autista.numeroViaggi.toString(), // Convertilo a stringa, in modo che BigInt non crei problemi
+            disponibile: autista.disponibile
+        }));
+        return { success: true, message: autistiFormattati };
+    } catch (error) {
+        return { success: false, message: error.message || error };
     }
 }

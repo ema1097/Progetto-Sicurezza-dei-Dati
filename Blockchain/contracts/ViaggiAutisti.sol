@@ -7,6 +7,7 @@ contract ViaggiAutisti is AccessControl {
     bytes32 public constant DRIVER_ROLE = keccak256("DRIVER_ROLE");
 
     struct Autista {
+        address id;
         string email;
         string nome;
         string cognome;
@@ -31,9 +32,15 @@ contract ViaggiAutisti is AccessControl {
     // Mappings per salvare autisti, tratte e viaggi
     mapping(address => Autista) public autisti;
     mapping(uint => Tratta) public tratte;
+    
     Viaggio[] public viaggi;
 
+
     uint public tratteCount;
+
+    address[] public autistiList; // Array per memorizzare gli indirizzi degli autisti
+    uint[] public tratteList; // Array per memorizzare gli ID delle tratte
+
 
     constructor (){
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -42,7 +49,9 @@ contract ViaggiAutisti is AccessControl {
 
     // Metodo per registrare un nuovo autista e assegnare il ruolo DRIVER_ROLE
     function registraNuovoAutista(address autistaAddress, string memory email, string memory nome, string memory cognome) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Solo l'admin puo aggiungere un nuovo autista");
         Autista memory nuovoAutista = Autista({
+            id: autistaAddress,
             email: email,
             nome: nome,
             cognome: cognome,
@@ -50,7 +59,11 @@ contract ViaggiAutisti is AccessControl {
             disponibile: false  // L'autista non è disponibile per default alla registrazione
         });
         autisti[autistaAddress] = nuovoAutista;
+        
         _grantRole(DRIVER_ROLE, autistaAddress);
+
+        // Aggiungi l'autista all'array degli indirizzi
+        autistiList.push(autistaAddress);
     }
 
     // Metodo per aggiornare la disponibilità di un autista
@@ -72,6 +85,9 @@ contract ViaggiAutisti is AccessControl {
             assegnata: false
         });
         tratte[tratteCount] = nuovaTratta;
+
+         // Aggiungi l'ID della tratta all'array
+        tratteList.push(tratteCount);
     }
 
     // Metodo per creare un viaggio, utilizzabile solo dall'admin
@@ -126,5 +142,54 @@ contract ViaggiAutisti is AccessControl {
         }
 
         return viaggiAutista;
+    }
+
+    // Metodo per ottenere tutti gli autisti
+    function getAllAutisti() public view returns (Autista[] memory) {
+        uint autistiCount = autistiList.length;
+        Autista[] memory allAutisti = new Autista[](autistiCount);
+
+        for (uint i = 0; i < autistiCount; i++) {
+            allAutisti[i] = autisti[autistiList[i]];
+        }
+
+        return allAutisti;
+    }
+
+    // Metodo per ottenere tutte le tratte
+    function getAllTratte() public view returns (Tratta[] memory) {
+        uint tratte_count = tratteList.length;
+        Tratta[] memory allTratte = new Tratta[](tratte_count);
+
+        for (uint i = 0; i < tratte_count; i++) {
+            allTratte[i] = tratte[tratteList[i]];
+        }
+
+        return allTratte;
+    }
+
+     // Metodo per ottenere tutti gli autisti disponibili
+    function getAutistaDisponibile() public view returns (Autista[] memory) {
+        uint disponibileCount = 0;
+
+        // Conta gli autisti disponibili
+        for (uint i = 0; i < autistiList.length; i++) {
+            if (autisti[autistiList[i]].disponibile) {
+                disponibileCount++;
+            }
+        }
+
+        Autista[] memory autistiDisponibili = new Autista[](disponibileCount);
+        uint j = 0;
+
+        // Popola l'array con gli autisti disponibili
+        for (uint i = 0; i < autistiList.length; i++) {
+            if (autisti[autistiList[i]].disponibile) {
+                autistiDisponibili[j] = autisti[autistiList[i]];
+                j++;
+            }
+        }
+
+        return autistiDisponibili;
     }
 }
