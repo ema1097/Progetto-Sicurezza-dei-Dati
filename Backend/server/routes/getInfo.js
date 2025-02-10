@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
 
-import { getAllAutisti, getAllTratte, getAutistaDisponibile, mostraTuttiIViaggi, mostraViaggiAutista } from './../scripts/interazione_contratto.js'
+import { getAllAutisti, getAllTratte, getAutistaDisponibile, mostraTuttiIViaggi, mostraViaggiAutista,getAutista } from './../scripts/interazione_contratto.js'
 
 
 // Endpoint per ottenre tutti gli autista
@@ -13,6 +13,17 @@ router.post('/allAutisti', async (req, res) => {
     else 
       res.json({ success: success, message: message  });
 });
+
+router.post('/getAutista', async (req, res) => {
+
+     const {autistaAddress} = req.body
+    // Salvo l'autista sulla blockchain
+    const { success, message} = await getAutista(autistaAddress);    
+      if(success === true)
+        res.json({ success: success, message: message });
+      else 
+        res.json({ success: success, message: message  });
+  });
 
 // Endpoint per ottenre tutti gli autista
 router.post('/getAllAutistiDisponibile', async (req, res) => {

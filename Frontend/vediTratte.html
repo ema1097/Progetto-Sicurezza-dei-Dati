@@ -1,193 +1,220 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tratte Prenotate</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
-<body>
-<div class="container mt-5">
-    <h2>Tratte disponibili</h2>
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Partenza</th>
-                <th>Arrivo</th>
-                <th>Data</th>
-                <th>Importo (€)</th>
-                <th>Assegnata</th>
-            </tr>
-        </thead>
-        <tbody id="tratte-table-body">
-            <!-- Le tratte saranno inserite dinamicamente qui -->
-        </tbody>
-    </table>
-    <a href="dashboard.html" class="btn btn-primary mt-3">Torna alla Dashboard</a>
-</div>
 
-<!-- Modale per la selezione degli autisti -->
-<div class="modal fade" id="autistiModal" tabindex="-1" role="dialog" aria-labelledby="autistiModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="autistiModalLabel">Seleziona un Autista</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <ul id="autisti-list" class="list-group">
-                    <!-- Lista degli autisti disponibili sarà inserita dinamicamente qui -->
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+<body>
+    <div class="container mt-5">
+        <h2>Tratte disponibili</h2>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Partenza</th>
+                    <th>Arrivo</th>
+                    <th>Data</th>
+                    <th>Importo (€)</th>
+                    <th>Assegnata</th>
+                </tr>
+            </thead>
+            <tbody id="tratte-table-body">
+                <!-- Le tratte saranno inserite dinamicamente qui -->
+            </tbody>
+        </table>
+        <a href="dashboard.html" class="btn btn-primary mt-3">Torna alla Dashboard</a>
+    </div>
+
+    <!-- Modale per la selezione degli autisti -->
+    <div class="modal fade" id="autistiModal" tabindex="-1" role="dialog" aria-labelledby="autistiModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="autistiModalLabel">Seleziona un Autista</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul id="autisti-list" class="list-group">
+                        <!-- Lista degli autisti disponibili sarà inserita dinamicamente qui -->
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- jQuery prima, poiché Bootstrap si basa su di esso -->
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
-<!-- JavaScript di Bootstrap -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-
-
-<script>
-
-
-// Funzione per aprire il modal e mostrare gli autisti disponibili
-function prenotaTratta(trattaIndex) {
-    let autisti = JSON.parse(localStorage.getItem('users')) || []; // Recupera gli autisti dal localStorage
-    let autistiList = document.getElementById('autisti-list'); // Elemento della lista nel modal
-    
-    // Svuota la lista degli autisti prima di popolarla
-    autistiList.innerHTML = '';
-
-    // Filtra gli autisti disponibili (disponibilità === 1)
-    let autistiDisponibili = autisti.filter(function(autista) {
-        return autista.disponibilita === 1; // Mostra solo autisti disponibili
-    });
-
-    // Verifica se ci sono autisti disponibili
-    if (autistiDisponibili.length === 0) {
-        // Se non ci sono autisti disponibili, mostra un messaggio
-        let listItem = document.createElement('li');
-        listItem.className = 'list-group-item';
-        listItem.textContent = 'Nessun autista disponibile';
-        autistiList.appendChild(listItem);
-    } else {
-        // Crea gli elementi della lista per ogni autista disponibile
-        autistiDisponibili.forEach(function(autista) {
-            let listItem = document.createElement('li');
-            listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-            listItem.textContent = autista.nome + ' ' + autista.cognome;
-
-            // Bottone per selezionare l'autista
-            let button = document.createElement('button');
-            button.className = 'btn btn-primary btn-sm';
-            button.textContent = 'Seleziona';
-            button.onclick = function() {
-                assegnaTratta(trattaIndex, autista.email); // Assegna la tratta all'autista selezionato
-            };
-
-            listItem.appendChild(button);
-            autistiList.appendChild(listItem);
-        });
-    }
-
-    // Mostra il modal
-    $('#autistiModal').modal('show');
-}
-
-
-    // Funzione per caricare e mostrare le tratte salvate nel localStorage
-    function caricaTratte() {
-        let tratte = JSON.parse(localStorage.getItem('tratte')) || [];
-        let tableBody = document.getElementById('tratte-table-body');
-        
-        // Svuota la tabella prima di popolarla
-        tableBody.innerHTML = '';
-
-        if (tratte.length === 0) {
-            // Se non ci sono tratte, aggiunge una riga che lo indica
-            let row = tableBody.insertRow();
-            let cell = row.insertCell(0);
-            cell.colSpan = 6;
-            cell.textContent = 'Nessuna tratta disponibile.';
-        } else {
-            // Inserisce ogni tratta in una riga della tabella
-            tratte.forEach(function(tratta, index) {
-                let row = tableBody.insertRow();
-                
-                // Colonna indice
-                let cellIndex = row.insertCell(0);
-                cellIndex.textContent = index + 1;
-                
-                // Colonna Partenza
-                let cellPartenza = row.insertCell(1);
-                cellPartenza.textContent = tratta.partenza;
-                
-                // Colonna Arrivo
-                let cellArrivo = row.insertCell(2);
-                cellArrivo.textContent = tratta.arrivo;
-                
-                // Colonna Data
-                let cellData = row.insertCell(3);
-                cellData.textContent = tratta.data;
-                
-                // Colonna Importo
-                let cellImporto = row.insertCell(4);
-                cellImporto.textContent = tratta.importo.toFixed(2);
-                
-              
-                // Colonna Assegnata (true/false)
-                let cellAssegnata = row.insertCell(5);
-                if (tratta.assegnata) {
-                // Mostra il nome dell'autista assegnato
-                    cellAssegnata.textContent = tratta.autista; 
-                } else {
-                // Mostra il pulsante "Assegna" se la tratta non è ancora assegnata
-                    cellAssegnata.innerHTML = '<button class="btn btn-success btn-sm" onclick="prenotaTratta(' + index + ')">Assegna</button>';
+    <script>
+        // Carica le tratte dal server e popola la tabella
+        function caricaTratte() {
+            $.ajax({
+                url: "http://127.0.0.1:3007/info/allTratte",
+                type: "POST",
+                success: function (response) {
+                    if (response.success) {
+                        console.log("Tratte recuperate:", response.message);
+                        popolaTabella(response.message);
+                    } else {
+                        console.error("Errore nella risposta:", response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Errore AJAX:", error);
                 }
             });
         }
-    }
 
-    
+        // Popola la tabella con le tratte
+        function popolaTabella(tratte) {
+            const tableBody = document.getElementById('tratte-table-body');
+            tableBody.innerHTML = ''; // Svuota la tabella
 
-    // Funzione per assegnare una tratta a un autista
-    function assegnaTratta(trattaIndex, autistaEmail) {
-        let tratte = JSON.parse(localStorage.getItem('tratte')) || [];
-        let autisti = JSON.parse(localStorage.getItem('users')) || [];
-        
-        if (tratte[trattaIndex]) {
-            tratte[trattaIndex].assegnata = true; // Imposta la tratta come assegnata
-            tratte[trattaIndex].autista = autistaEmail; // Aggiungi l'email dell'autista
-            localStorage.setItem('tratte', JSON.stringify(tratte)); // Salva di nuovo nel localStorage
+            if (tratte.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 6;
+                cell.textContent = 'Nessuna tratta disponibile.';
+            } else {
+                tratte.forEach((tratta, index) => {
+                    const row = tableBody.insertRow();
+
+                    // Colonna indice
+                    row.insertCell(0).textContent = index + 1;
+
+                    // Colonne Partenza, Arrivo, Data, Importo
+                    row.insertCell(1).textContent = tratta.partenza;
+                    row.insertCell(2).textContent = tratta.arrivo;
+                    row.insertCell(3).textContent = tratta.data;
+                    row.insertCell(4).textContent = tratta.pagamento;
+
+                    // Colonna Assegnata
+                    const cellAssegnata = row.insertCell(5);
+
+                    if (tratta.assegnata) {
+                        getAutistaAssegnato(tratta.id, cellAssegnata);
+                    } else {
+                        cellAssegnata.innerHTML = `
+                            <button class="btn btn-success btn-sm" onclick="prenotaTratta(${index})">Assegna</button>
+                        `;
+                    }
+                });
+            }
         }
 
-        // Aggiorna la disponibilità dell'autista
-        autisti.forEach(function(autista) {
-            if (autista.email === autistaEmail) {
-                autista.disponibilita = 0; // Imposta l'autista come non disponibile
-                autista.viaggi++;
-            }
-        });
-        localStorage.setItem('users', JSON.stringify(autisti)); // Salva di nuovo nel localStorage
+        // Recupera l'autista assegnato per una tratta
+        function getAutistaAssegnato(trattaId, cell) {
+            $.ajax({
+                url: "http://127.0.0.1:3007/info/mostraTuttiIviaggi",
+                type: "POST",
+                success: function (response) {
+                    if (response.success) {
+                        const viaggio = response.message.find(item => item.tratta.id === trattaId);
+                        if (viaggio) {
+                            const { nome, cognome } = viaggio.autista;
+                            cell.textContent = `${nome} ${cognome}`;
+                        } else {
+                            cell.textContent = "Errore nell'assegnazione.";
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Errore AJAX:", error);
+                }
+            });
+        }
 
-        console.log(autisti);
-        caricaTratte(); // Ricarica le tratte per aggiornare la visualizzazione
-        $('#autistiModal').modal('hide'); // Chiudi il modale
-    }
+        // Mostra il modal con gli autisti disponibili
+        function prenotaTratta(trattaIndex) {
+            let autistiList = document.getElementById('autisti-list'); // Elemento della lista nel modal
 
-    // Carica le tratte quando la pagina viene caricata
-    window.onload = caricaTratte;
-</script>
+            // Svuota la lista degli autisti prima di popolarla
+            autistiList.innerHTML = '';
 
+            $.ajax({
+                url: "http://127.0.0.1:3007/info/getAllAutistiDisponibile", // Endpoint per recuperare gli autisti
+                type: "POST",
+                success: function (response) {
+                    if (response.message.length > 0) {
+                        // Ordina gli autisti in base al numero di viaggi (crescentemente)
+                        let autistiOrdinati = response.message.sort((a, b) => a.numeroViaggi - b.numeroViaggi);
+
+                        autistiOrdinati.forEach(function (autista) {
+                            console.log(autista);
+                            let listItem = document.createElement('li');
+                            listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            listItem.textContent = `${autista.nome} ${autista.cognome} (${autista.numeroViaggi} viaggi)`;
+
+                            // Bottone per selezionare l'autista
+                            let button = document.createElement('button');
+                            button.className = 'btn btn-primary btn-sm';
+                            button.textContent = 'Seleziona';
+
+                            button.onclick = function () {
+                                registraViaggio(trattaIndex + 1, autista.id); // Assegna la tratta all'autista selezionato
+                            };
+
+                            listItem.appendChild(button);
+                            autistiList.appendChild(listItem);
+                        });
+                    } else {
+                        // Se non ci sono autisti disponibili, mostra un messaggio
+                        let listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+                        listItem.textContent = 'Nessun autista disponibile';
+                        autistiList.appendChild(listItem);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Errore durante la richiesta:", error);
+                }
+            });
+
+            // Mostra il modal
+            $('#autistiModal').modal('show');
+        }
+
+        // Registra un viaggio
+        function registraViaggio(trattaIndex, autistaID) {
+            const viaggio = {
+                autistaAddress: autistaID,
+                trattaId: trattaIndex,
+                admin: "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+            };
+
+            $.ajax({
+                url: "http://127.0.0.1:3007/registrazione/registraViaggio",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(viaggio),
+                success: function (response) {
+                    if (response.success) {
+                        caricaTratte();
+                        $('#autistiModal').modal('hide');
+                    } else {
+                        console.error("Errore durante la registrazione del viaggio:", response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Errore AJAX:", error);
+                }
+            });
+        }
+
+        // Carica le tratte al caricamento della pagina
+        window.onload = caricaTratte;
+    </script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

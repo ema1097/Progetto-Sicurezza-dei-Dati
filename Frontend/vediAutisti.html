@@ -44,12 +44,16 @@ function caricaAutisti() {
     autistiContainer.innerHTML = '';
 
     $.ajax({
-        url: "http://127.0.0.1:3007/autisti/getAllAutisti", // Endpoint per recuperare gli autisti
-        type: "GET", // Metodo GET per ottenere i dati
+        url: "http://127.0.0.1:3007/info/allAutisti", // Endpoint per recuperare gli autisti
+        type: "POST", // Metodo POST per ottenere i dati
         success: function(response) {
-            if (response.success && response.autisti.length > 0) {
+            if(response.success){
+                console.log(response.message);
+            }
+            if (response.success && response.message.length > 0) {
+
                 // Itera sugli autisti e crea una tile per ciascuno
-                response.autisti.forEach(function(autista) {
+                response.message.forEach(function(autista) {
                     let col = document.createElement('div');
                     col.classList.add('col-md-4');
 
@@ -80,7 +84,7 @@ function caricaAutisti() {
                     // Aggiunge la colonna alla riga del container
                     autistiContainer.appendChild(col);
                 });
-            } else if (response.success && response.autisti.length === 0) {
+            } else if (response.success && response.message.length === 0) {
                 // Se non ci sono autisti
                 autistiContainer.innerHTML = '<p class="text-center">Nessun autista registrato.</p>';
             } else {
@@ -153,6 +157,7 @@ function caricaAutisti() {
     window.onload = caricaAutisti;
 </script>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 </body>
 </html>

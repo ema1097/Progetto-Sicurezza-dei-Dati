@@ -192,4 +192,8 @@ contract ViaggiAutisti is AccessControl {
 
         return autistiDisponibili;
     }
+
+    function getAutista(address addressAutista) public view returns (Autista memory) {
+        return autisti[addressAutista];
+    }
 }

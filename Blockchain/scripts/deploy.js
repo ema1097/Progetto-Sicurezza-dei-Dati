@@ -13,7 +13,7 @@ async function main() {
   const [deployer] = await hre.ethers.getSigners();
 
   await ViaggiAutisti.waitForDeployment();
-  console.log("The admin autism is ", deployer.address);
+  console.log("The admin address is ", deployer.address);
   console.log("The contract address is ", await ViaggiAutisti.getAddress());
 }
 

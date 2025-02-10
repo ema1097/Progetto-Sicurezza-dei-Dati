@@ -166,6 +166,28 @@ export const getAllAutisti = async () =>{
     }
 }
 
+export const getAutista = async (autistaAddress) =>{
+    const { contract, admin} = await InizializzaContratto();
+
+    try {
+        const autista = await contract.methods.getAutista(autistaAddress).call();
+            console.log("fsf")
+        // Mappare e formattare i dati per avere solo proprietà leggibili
+        const autistaFormattato =  ({
+            id: autista.id,
+            email: autista.email,
+            nome: autista.nome,
+            cognome: autista.cognome,
+            numeroViaggi: autista.numeroViaggi.toString(), // Convertilo a stringa, in modo che BigInt non crei problemi
+            disponibile: autista.disponibile
+        });
+        
+        return { success: true, message: autistaFormattato };
+    } catch (error) {
+        return { success: false, message: error.message || error };
+    }
+}
+
 export const getAllTratte = async () =>{
     const { contract } = await InizializzaContratto();
 
@@ -178,7 +200,7 @@ export const getAllTratte = async () =>{
             partenza: tratta.partenza,
             arrivo: tratta.arrivo,
             data: tratta.data,
-            pagamento: tratta.pagamenti, 
+            pagamento: tratta.pagamento, 
             assegnata: tratta.assegnata
         }));
 
