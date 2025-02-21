@@ -3,9 +3,7 @@ import express from "express";
 import cors from 'cors';
 import http from 'http'; 
 import { fileURLToPath } from 'url';
-import fs from 'fs';
 import path from 'path';
-import bodyParser from 'body-parser';
 
 import registrazione from './routes/registrazione.js';
 import servizio from './routes/gestioneServizio.js';
@@ -25,12 +23,6 @@ app.use(express.json());
 app.use('/registrazione', registrazione);
 app.use('/servizio', servizio);
 app.use('/info', allInfo);
-
-// Configurazione del server HTTPS
-const options = {
-  key: fs.readFileSync(path.resolve(__dirname,'https_file/server_keyA.pem')),
-  cert: fs.readFileSync(path.resolve(__dirname,'https_file/server_certA.pem'))
-};
 
 const server = http.createServer(app); // Crea il server HTTP
 

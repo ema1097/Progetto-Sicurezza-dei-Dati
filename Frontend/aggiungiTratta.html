@@ -8,28 +8,43 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Aggiungi tratta</h1>
-    
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <button id="goHome" class="btn btn-danger">Home</button>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2>Aggiungi tratta</h2>
         <form id="aggiungiTrattaForm">
-            <label for="partenza">Partenza:</label>
-            <input type="text" id="partenza" name="partenza" placeholder="Inserisci la città di partenza" required>
-    
-            <label for="arrivo">Arrivo:</label>
-            <input type="text" id="arrivo" name="arrivo" placeholder="Inserisci la città di arrivo" required>
-    
-            <label for="data">Data di Viaggio:</label>
-            <input type="date" id="data" name="data" required>
-    
-            <label for="pagamento">Importo del Pagamento (in €):</label>
-            <input type="number" id="pagamento" name="pagamento" placeholder="Inserisci l'importo" min="0" step="0.01" required>
-    
-            <button type="submit">Aggiungi</button>
+            <div class="form-group">
+                <label for="partenza">Partenza:</label>
+                <input type="text" class="form-control" id="partenza" name="partenza" placeholder="Inserisci la città di partenza" required>
+            </div>
+            <div class="form-group">
+                <label for="arrivo">Arrivo:</label>
+                <input type="text" class="form-control" id="arrivo" name="arrivo" placeholder="Inserisci la città di arrivo" required>
+            </div>
+            <div class="form-group">
+                <label for="data">Data di Viaggio:</label>
+                <input type="date" class="form-control" id="data" name="data" required>
+            </div>
+            <div class="form-group">
+                <label for="pagamento">Importo del Pagamento (in €):</label>
+                <input type="number" class="form-control" id="pagamento" name="pagamento" placeholder="Inserisci l'importo" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Aggiungi</button>
         </form>
     </div>
-    
-</body>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="script.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        document.getElementById("goHome").addEventListener("click", function () {
+            window.location.href = "dashboard.html";
+        });
+    </script>
 </body>
 </html>

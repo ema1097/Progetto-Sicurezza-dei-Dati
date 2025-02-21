@@ -13,7 +13,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand">Dashboard</a>
+            <a class="navbar-brand"></a>
             <button id="logout" class="btn btn-danger">Logout</button>
         </div>
     </nav>
@@ -26,16 +26,28 @@
         </div>
 
         <!-- Action buttons -->
-        <div class="mt-4">
-            <a href="registrazione.html" id="aggiungiAutista" class="btn btn-primary mb-2">Aggiungi Autista</a>
-            <a href="vediAutisti.html" id="listaAutisti" class="btn btn-info mb-2">Vedi Autisti</a>
-            <a href="aggiungiTratta.html" id="aggiungiTratta" class="btn btn-success mb-2">Aggiungi Tratta</a>
-            <a href="vediTratte.html" id="vediTratte" class="btn btn-warning mb-2">Vedi Tratte</a>
+        <div class="row mt-4 d-flex justify-content-center">
+            <div class="col-6 col-md-3 mb-2">
+                <a href="registrazione.html" id="aggiungiAutista" class="btn btn-block">Aggiungi Autista</a>
+            </div>
+            <div class="col-6 col-md-3 mb-2">
+                <a href="vediAutisti.html" id="listaAutisti" class="btn btn-block">Vedi Autisti</a>
+            </div>
+        </div>
+        <div class="row mt-4 d-flex justify-content-center">
+            <div class="col-6 col-md-3 mb-2">
+                <a href="aggiungiTratta.html" id="aggiungiTratta" class="btn btn-block">Aggiungi Tratta</a>
+            </div>
+            <div class="col-6 col-md-3 mb-2">
+                <a href="vediTratte.html" id="vediTratte" class="btn btn-block">Vedi Tratte</a>
+            </div>
         </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+
 </body>
 
 </html>

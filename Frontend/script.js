@@ -27,6 +27,10 @@ $(document).ready(function () {
         );
     }
 
+    //controlla se è stato effettuato l'accesso altrimenti rimanda alla login
+    checkAuthentication();
+
+
     // Funzione per ottenere e rimuovere il prossimo indirizzo disponibile
     function getNextAddress() {
         const addresses = JSON.parse(localStorage.getItem("ethAddresses")) || [];
@@ -71,37 +75,31 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     console.log("Autista registrato con successo:", response);
+                    alert("Autista registrato con successo.");
 
                     // Recupera gli utenti esistenti da localStorage (o un array vuoto se non ce ne sono)
                     let users = JSON.parse(localStorage.getItem('users')) || [];
-                    console.log("utenti prima", users);
-                    // Aggiungi il nuovo utente
+
                     const newUser = {
                         email: email,
                         password: pass, // Meglio non salvarla in chiaro
                         ethAddress: ethAddress
                     };
-                    users.push(newUser);
-                    console.log("utenti dopo", users);
+
+                    // Trova l'indice dell'utente con la stessa email
+                    const existingIndex = users.findIndex(user => user.email === email);
+
+                    if (existingIndex !== -1) {
+                        // Se l'utente esiste già, sostituiscilo
+                        users[existingIndex] = newUser;
+                    } else {
+                        // Altrimenti, aggiungilo all'array
+                        users.push(newUser);
+                    }
 
                     // Salva l'array aggiornato in localStorage
                     localStorage.setItem('users', JSON.stringify(users));
 
-                    /*const autista = {
-                        autistaAddress: ethAddress,
-                        nome: name,
-                        cognome: surname,
-                        email: email,
-                        password: pass,
-                        address: ethAddress,
-                        viaggi: 0,
-                        disponibilita: 0,
-                    }
-            
-            
-                    // Salvataggio dei dati in locale (simulazione registrazione)
-                    addUser(autista);
-                    loadUsers();*/
                     // Redirect alla dashboard
                     window.location.href = 'dashboard.html';
 
@@ -348,6 +346,9 @@ $(document).ready(function () {
                     contentType: "application/json",
                     data: JSON.stringify({ autistaAddress: autistaAddress }), // Passa un oggetto JSON
                     success: function (response) {
+
+                        const msg = response.message;
+
                         if (response.success) {
                             const autista = {
                                 autistaAddress: response.message.id,
@@ -382,7 +383,7 @@ $(document).ready(function () {
 
     });
 
-    // Gestione pulsante "Candidati"
+    // Gestione pulsante "Disponibilita"
     $('#btnCandidati').on('click', function (e) {
         e.preventDefault();
 
@@ -508,61 +509,34 @@ $(document).ready(function () {
 
                         // Resetta il form
                         document.getElementById('aggiungiTrattaForm').reset();
+                        window.location.href = 'dashboard.html';
+
                     } else {
                         console.error("Errore nell'aggiunta della tratta:", response.message);
+                        alert("Errore nell'aggiunta della tratta!");
+
                     }
                 },
                 error: function (xhr, status, error) {
                     console.error("Errore durante la richiesta:", error);
+                    alert("Errore nell'aggiunta della tratta!");
+
                 }
             });
-            window.location.href = 'dashboard.html';
-            
-        }else{
+
+        } else {
             alert("Data non valida");
             document.getElementById("data").focus();
         }
     });
 
+    function checkAuthentication() {
+        const loggedInUser = sessionStorage.getItem('loggedUser');
+        const currentPage = window.location.pathname.split("/").pop(); // Ottiene il nome del file attuale
 
-    /*document.getElementById('aggiungiTrattaForm').addEventListener('submit', function (event) {
-        event.preventDefault(); // Evita il reload della pagina
-
-        // Genera un id unico per la tratta
-        const generateId = () => Math.random();
-
-        // Ottiene i valori inseriti dall'utente
-        const partenza = document.getElementById('partenza').value;
-        const arrivo = document.getElementById('arrivo').value;
-        const data = document.getElementById('data').value;
-        const importo = parseFloat(document.getElementById('pagamento').value); // Converti il pagamento in un numero
-
-        // Crea un oggetto tratta con i campi richiesti
-        const tratta = {
-            id: generateId(),
-            partenza: partenza,
-            arrivo: arrivo,
-            data: data,
-            importo: importo,
-            assegnata: false // Imposta assegnata su false per default
-        };
-
-        console.log(tratta);
-
-        // Recupera eventuali tratte già salvate nel localStorage
-        let tratte = JSON.parse(localStorage.getItem('tratte')) || [];
-
-        // Aggiunge la nuova tratta alla lista di tratte
-        tratte.push(tratta);
-
-        // Salva la lista aggiornata nel localStorage
-        localStorage.setItem('tratte', JSON.stringify(tratte));
-
-        // Messaggio di conferma (facoltativo)
-        alert('Tratta aggiunta con successo!');
-
-        // Resetta il form
-        document.getElementById('aggiungiTrattaForm').reset();
-    });*/
+        if (!loggedInUser && currentPage !== "login.html") {
+            window.location.href = 'login.html';
+        }
+    }
 
 });

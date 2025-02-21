@@ -11,6 +11,12 @@
 </head>
 
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <button id="goHome" class="btn btn-danger">Home</button>
+        </div>
+    </nav>
     <div class="container mt-5">
         <h2>Tratte disponibili</h2>
         <table class="table table-bordered table-striped">
@@ -215,6 +221,12 @@
     </script>
 
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.getElementById("goHome").addEventListener("click", function () {
+            window.location.href = "dashboard.html";
+        });
+    </script>
 </body>
 
 </html>

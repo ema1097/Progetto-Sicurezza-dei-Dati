@@ -31,7 +31,7 @@ body {
 }
 
 .navbar a:hover {
-    background-color: #575757;
+    background-color: #007bff;
 }
 
 .profile-container {
@@ -72,6 +72,14 @@ body {
     margin-right: 10px;
 }
 
+.btn:hover{
+    color: black;
+}
+
 .btn:hover {
     background-color: #007bff;
+}
+
+.travel-table{
+    margin: 40px;
 }

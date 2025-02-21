@@ -10,7 +10,7 @@
 <body>
 
     <div class="navbar">
-        <a href="#" id="logoutButton" class="btn">Logout</a>
+        <a href="#" id="logoutButton" class="btn btn-primary">Logout</a>
     </div>
 
     <div class="profile-container">
@@ -23,16 +23,18 @@
             <p><strong>Viaggi effettuati:</strong> <span id="viaggi">Viaggi</span></p>
             <p><strong>Disponibilità:</strong> <span id="disponibilita">Disponibilità</span></p>
         </div>
-        <div class="action-buttons">
-            <button id="btnCandidati" class="btn btn-candidati">Candidati</button>
-            <button id="btnRimuovi" class="btn btn-rimuovi">Rimuovi Disponibilità</button>
+        <div class="action-buttons d-flex">
+            <button id="btnCandidati" class="btn btn-primary flex-fill mx-2">Disponibile</button>
+            <button id="btnRimuovi" class="btn btn-primary flex-fill mx-2">Riposo</button>
         </div>
+        
+        
     </div>
 
     <!-- Sezione Tabella Viaggi Effettuati -->
     <div class="travel-table">
         <h3>Viaggi Effettuati</h3>
-        <table class="table">
+        <table class="table table-bordered table-striped">
             <thead>
                 <tr>
                     <th>#</th>
@@ -49,9 +51,9 @@
     </div>
 
     <!-- Sezione Tabella Viaggi Da Effettuare -->
-    <div class="travel-table">
+    <div class="travel-table  ">
         <h3>Viaggi Da Effettuare</h3>
-        <table class="table">
+        <table class="table table-bordered table-striped">
             <thead>
                 <tr>
                     <th>#</th>
@@ -94,6 +96,8 @@
                     contentType: "application/json",
                     data: JSON.stringify({ autistaAddress: loggedInUser.autistaAddress }), // Invia l'indirizzo dell'autista come JSON
                     success: function(response) {
+                        
+                        console.log("REsponce " + response.message);
                         const viaggi = response.message; // Risposta con i viaggi
                         const tableBodyEffettuati = document.getElementById('viaggiEffettuatiTableBody');
                         const tableBodyDaEffettuare = document.getElementById('viaggiDaEffettuareTableBody');

@@ -171,7 +171,7 @@ export const getAutista = async (autistaAddress) =>{
 
     try {
         const autista = await contract.methods.getAutista(autistaAddress).call();
-            console.log("fsf")
+    
         // Mappare e formattare i dati per avere solo proprietà leggibili
         const autistaFormattato =  ({
             id: autista.id,

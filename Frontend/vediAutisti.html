@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,149 +16,216 @@
             margin: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
+
+        .tile:hover {
+            transform: scale(1.05);
+        }
+
         .tile h5 {
             margin-bottom: 15px;
             color: #343a40;
         }
+
         .tile p {
             margin-bottom: 5px;
         }
     </style>
 </head>
+
 <body>
-<div class="container mt-5">
-    <h2>Autisti Registrati</h2>
-    <div class="row" id="autisti-container">
-        <!-- Le informazioni degli autisti saranno inserite dinamicamente qui -->
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <button id="goHome" class="btn btn-danger">Home</button>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2>Autisti Registrati</h2>
+        <div class="row" id="autisti-container">
+            <!-- Le informazioni degli autisti saranno inserite dinamicamente qui -->
+        </div>
     </div>
-    <a href="dashboard.html" class="btn btn-primary mt-3">Torna alla Dashboard</a>
-</div>
 
-<script>
+    <!-- MODAL DETTAGLI VIAGGI -->
+    <div class="modal fade" id="viaggiModal" tabindex="-1" aria-labelledby="viaggiModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viaggiModalLabel">Viaggi dell'autista</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h5>Viaggi Effettuati</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Partenza</th>
+                                <th>Arrivo</th>
+                                <th>Data</th>
+                                <th>Pagamento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viaggiEffettuatiTableBody">
+                            <!-- Viaggi effettuati -->
+                        </tbody>
+                    </table>
 
-function caricaAutisti() {
-    // Elemento del container
-    let autistiContainer = document.getElementById('autisti-container');
+                    <h5 class="mt-4">Viaggi da Effettuare</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Partenza</th>
+                                <th>Arrivo</th>
+                                <th>Data</th>
+                                <th>Pagamento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viaggiDaEffettuareTableBody">
+                            <!-- Viaggi futuri -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    // Svuota il contenuto prima di popolarlo
-    autistiContainer.innerHTML = '';
 
-    $.ajax({
-        url: "http://127.0.0.1:3007/info/allAutisti", // Endpoint per recuperare gli autisti
-        type: "POST", // Metodo POST per ottenere i dati
-        success: function(response) {
-            if(response.success){
-                console.log(response.message);
-            }
-            if (response.success && response.message.length > 0) {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-                // Itera sugli autisti e crea una tile per ciascuno
-                response.message.forEach(function(autista) {
-                    let col = document.createElement('div');
-                    col.classList.add('col-md-4');
+    <script>
+        function caricaAutisti() {
+            let autistiContainer = document.getElementById('autisti-container');
+            autistiContainer.innerHTML = '';
 
-                    let tile = document.createElement('div');
-                    tile.classList.add('tile');
+            $.ajax({
+                url: "http://127.0.0.1:3007/info/allAutisti",
+                type: "POST",
+                success: function (response) {
+                    if (response.success) {
+                        console.log(response.message);
+                    }
+                    if (response.success && response.message.length > 0) {
+                        response.message.forEach(function (autista) {
+                            let col = document.createElement('div');
+                            col.classList.add('col-md-4');
 
-                    let autistaNome = document.createElement('h5');
-                    autistaNome.textContent = 'Nome: ' + autista.nome + " " + autista.cognome;
+                            let tile = document.createElement('div');
+                            tile.classList.add('tile');
+                            tile.setAttribute('data-id', autista.id); // Memorizza l'ID dell'autista nella tile
 
-                    let autistaEmail = document.createElement('p');
-                    autistaEmail.textContent = 'Email: ' + autista.email;
+                            let autistaNome = document.createElement('h5');
+                            autistaNome.textContent = 'Nome: ' + autista.nome + " " + autista.cognome;
 
-                    let autistaViaggi = document.createElement('p');
-                    autistaViaggi.textContent = 'Viaggi: ' + autista.numeroViaggi;
+                            let autistaEmail = document.createElement('p');
+                            autistaEmail.textContent = 'Email: ' + autista.email;
 
-                    let autistaDisponibilita = document.createElement('p');
-                    autistaDisponibilita.textContent = 'Disponibilità: ' + (autista.disponibile ? 'Sì' : 'No');
+                            let autistaViaggi = document.createElement('p');
+                            autistaViaggi.textContent = 'Viaggi: ' + autista.numeroViaggi;
 
-                    // Aggiunge gli elementi alla tile
-                    tile.appendChild(autistaNome);
-                    tile.appendChild(autistaEmail);
-                    tile.appendChild(autistaViaggi);
-                    tile.appendChild(autistaDisponibilita);
+                            let autistaDisponibilita = document.createElement('p');
+                            autistaDisponibilita.textContent = 'Disponibilità: ' + (autista.disponibile ? 'Sì' : 'No');
 
-                    // Aggiunge la tile alla colonna
-                    col.appendChild(tile);
+                            // Aggiunge elementi alla tile
+                            tile.appendChild(autistaNome);
+                            tile.appendChild(autistaEmail);
+                            tile.appendChild(autistaViaggi);
+                            tile.appendChild(autistaDisponibilita);
 
-                    // Aggiunge la colonna alla riga del container
-                    autistiContainer.appendChild(col);
-                });
-            } else if (response.success && response.message.length === 0) {
-                // Se non ci sono autisti
-                autistiContainer.innerHTML = '<p class="text-center">Nessun autista registrato.</p>';
-            } else {
-                console.error("Errore nella risposta:", response.message);
-                autistiContainer.innerHTML = '<p class="text-center text-danger">Errore nel caricamento degli autisti.</p>';
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Errore durante la richiesta:", error);
-            autistiContainer.innerHTML = '<p class="text-center text-danger">Errore nel caricamento degli autisti.</p>';
-        }
-    });
-}
+                            // Aggiunge evento di click sulla tile
+                            tile.addEventListener("click", function () {
+                                caricaViaggi(autista.id);
+                            });
 
-    // Funzione per caricare e visualizzare le informazioni degli autisti dal localStorage
-  /*  function caricaAutisti() {
-        let autisti = JSON.parse(localStorage.getItem('users')) || [];
-        let autistiContainer = document.getElementById('autisti-container');
-        
-        // Svuota il contenuto prima di popolarlo
-        autistiContainer.innerHTML = '';
-
-        if (autisti.length === 0) {
-            // Se non ci sono autisti, mostra un messaggio
-            autistiContainer.innerHTML = '<p class="text-center">Nessun autista registrato.</p>';
-        } else {
-            // Crea una tile per ogni autista
-            autisti.forEach(function(autista, index) {
-                let col = document.createElement('div');
-                col.classList.add('col-md-4');
-
-                console.log(autista);
-                
-                let tile = document.createElement('div');
-                tile.classList.add('tile');
-                
-                let autistaNome = document.createElement('h5');
-                autistaNome.textContent = 'Nome: ' + autista.nome + " " + autista.cognome;
-                
-                let autistaEmail = document.createElement('p');
-                autistaEmail.textContent = 'Email: ' + autista.email;
-
-                let autistaData = document.createElement('p');
-                autistaData.textContent = 'Data di nascita: ' + autista.dataDiNascita;
-
-                let autistaViaggi = document.createElement('p');
-                autistaViaggi.textContent = 'Viaggi: ' + autista.viaggi;
-
-                let autistaDisponibilita = document.createElement('p');
-                autistaDisponibilita.textContent = 'Disponibilità: ' + autista.disponibilita;
-       
-
-                // Aggiunge gli elementi alla tile
-                tile.appendChild(autistaNome);
-                tile.appendChild(autistaEmail);
-                tile.appendChild(autistaData);
-                tile.appendChild(autistaViaggi);
-                tile.appendChild(autistaDisponibilita);
-
-                // Aggiunge la tile alla colonna
-                col.appendChild(tile);
-
-                // Aggiunge la colonna alla riga del container
-                autistiContainer.appendChild(col);
+                            col.appendChild(tile);
+                            autistiContainer.appendChild(col);
+                        });
+                    } else {
+                        autistiContainer.innerHTML = '<p class="text-center text-danger">Errore nel caricamento degli autisti.</p>';
+                    }
+                },
+                error: function () {
+                    autistiContainer.innerHTML = '<p class="text-center text-danger">Errore nel caricamento degli autisti.</p>';
+                }
             });
         }
-    }*/
 
-    // Carica le informazioni degli autisti al caricamento della pagina
-    window.onload = caricaAutisti;
-</script>
+        function caricaViaggi(autistaAddress) {
+            let tableBodyEffettuati = document.getElementById('viaggiEffettuatiTableBody');
+            let tableBodyDaEffettuare = document.getElementById('viaggiDaEffettuareTableBody');
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+            // Pulizia della tabella prima di inserire nuovi dati
+            tableBodyEffettuati.innerHTML = '<tr><td colspan="5" class="text-center">Caricamento...</td></tr>';
+            tableBodyDaEffettuare.innerHTML = '<tr><td colspan="5" class="text-center">Caricamento...</td></tr>';
+
+            $.ajax({
+                url: 'http://127.0.0.1:3007/info/mostraTuttiIviaggiAutista',
+                method: 'POST',
+                contentType: "application/json",
+                data: JSON.stringify({ autistaAddress: autistaAddress }),
+                success: function (response) {
+                    tableBodyEffettuati.innerHTML = '';
+                    tableBodyDaEffettuare.innerHTML = '';
+
+                    if (response.success && response.message.length > 0) {
+                        const viaggi = response.message;
+                        let oggi = new Date(); // Data di oggi
+                        oggi.setHours(0, 0, 0, 0); // Rimuove le ore per il confronto
+
+                        let progressivoIdEffettuati = 1;
+                        let progressivoIdDaEffettuare = 1;
+
+                        viaggi.forEach(function (item) {
+                            const tratta = item.tratta;
+                            const dataViaggio = new Date(tratta.data);
+                            const row = document.createElement('tr');
+
+                            row.innerHTML = `
+                        <td>${(dataViaggio < oggi) ? progressivoIdEffettuati++ : progressivoIdDaEffettuare++}</td>
+                        <td>${tratta.partenza}</td>
+                        <td>${tratta.arrivo}</td>
+                        <td>${tratta.data}</td>
+                        <td>${tratta.pagamento}€</td>
+                    `;
+
+                            if (dataViaggio < oggi) {
+                                tableBodyEffettuati.appendChild(row);
+                            } else {
+                                tableBodyDaEffettuare.appendChild(row);
+                            }
+                        });
+                    } else {
+                        tableBodyEffettuati.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Nessun viaggio effettuato</td></tr>';
+                        tableBodyDaEffettuare.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Nessun viaggio in programma</td></tr>';
+                    }
+
+                    $('#viaggiModal').modal('show'); // Mostra il modal
+                },
+                error: function () {
+                    tableBodyEffettuati.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Errore nel caricamento</td></tr>';
+                    tableBodyDaEffettuare.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Errore nel caricamento</td></tr>';
+                }
+            });
+        }
+
+        // Caricamento iniziale
+        window.onload = caricaAutisti;
+
+        // Bottone per tornare alla dashboard
+        document.getElementById("goHome").addEventListener("click", function () {
+            window.location.href = "dashboard.html";
+        });
+    </script>
 
 </body>
+
 </html>
